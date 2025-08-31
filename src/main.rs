@@ -129,6 +129,39 @@ fn show_start_screen(
     }
 }
 
+fn show_level_select_screen(
+    rl: &mut RaylibHandle,
+    th: &RaylibThread,
+    tex: &Texture2D,
+    screen_w: i32,
+    screen_h: i32,
+) -> usize {
+    loop {
+        {
+            let mut d = rl.begin_drawing(th);
+            d.clear_background(Color::BLACK);
+
+            let scale = (screen_w as f32 / tex.width as f32)
+                .max(screen_h as f32 / tex.height as f32);
+            let dest_w = tex.width as f32 * scale;
+            let dest_h = tex.height as f32 * scale;
+
+            let src = Rectangle::new(0.0, 0.0, tex.width as f32, tex.height as f32);
+            let dest = Rectangle::new(
+                (screen_w as f32 - dest_w) * 0.5,
+                (screen_h as f32 - dest_h) * 0.5,
+                dest_w,
+                dest_h,
+            );
+            d.draw_texture_pro(tex, src, dest, Vector2::zero(), 0.0, Color::WHITE);
+        }
+
+        if rl.is_key_pressed(KeyboardKey::KEY_ONE) { return 0; }
+        if rl.is_key_pressed(KeyboardKey::KEY_TWO) { return 1; }
+        if rl.window_should_close() { return 0; }
+    }
+}
+
 #[derive(Clone)]
 struct Candy { i: usize, j: usize, collected: bool }
 
@@ -328,7 +361,20 @@ fn main() {
 
     let mut framebuffer = Framebuffer::new(SCREEN_W, SCREEN_H);
 
-    let mut current_level: usize = 0;
+    // Level selection moved after start screen.
+
+    let niveles_tex: Texture2D = rl
+        .load_texture(&raylib_thread, "assets/niveles.jpeg")
+        .expect("No se pudo cargar assets/niveles.jpeg");
+
+    let mut current_level: usize = show_level_select_screen(
+        &mut rl,
+        &raylib_thread,
+        &niveles_tex,
+        SCREEN_W as i32,
+        SCREEN_H as i32,
+    );
+
     let (mut maze, mut sprites, spawn, mut deadline) = load_level(current_level, BLOCK_SIZE, &rl);
 
     let mut player = Player { pos: spawn, a: -PI / 2.0, fov: PI / 3.0 };
@@ -398,7 +444,14 @@ fn main() {
 
                 if current_level + 1 >= LEVELS.len() {
                     show_start_screen(&mut rl, &raylib_thread, &inicio_tex, SCREEN_W as i32, SCREEN_H as i32);
-                    current_level = 0;
+                    let chosen = show_level_select_screen(
+                        &mut rl,
+                        &raylib_thread,
+                        &niveles_tex,
+                        SCREEN_W as i32,
+                        SCREEN_H as i32,
+                    );
+                    current_level = chosen;
                     let (m2, s2, spawn2, dl2) = load_level(current_level, BLOCK_SIZE, &rl);
                     maze = m2; sprites = s2; state.level_deadline = dl2;
                     player.pos = spawn2; player.a = -PI/2.0;

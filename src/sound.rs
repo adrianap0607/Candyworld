@@ -22,7 +22,7 @@ impl SoundManager {
         let mut music = audio
             .new_sound("sounds/candy.mp3")
             .expect("No se pudo cargar sounds/candy.mp3");
-        music.set_volume(0.7);
+        music.set_volume(0.3);
 
         let mgr = SoundManager {
             audio,
