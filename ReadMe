@@ -1,6 +1,6 @@
 # Candy Maze
 
-Candy Maze es un juego en primera persona hecho en **Rust** con la librería **raylib**.  
+Candy Maze es un juego en primera persona hecho en **Rust** con la librería raylib.  
 El objetivo es explorar un laberinto y recolectar todas las donas antes de que se acabe el tiempo.  
 Si logras reunirlas todas, pasas al siguiente nivel; si no, pierdes y deberás volver a intentarlo.  
 
@@ -19,6 +19,8 @@ Si logras reunirlas todas, pasas al siguiente nivel; si no, pierdes y deberás v
 4. Recolecta todas las donas antes de que el tiempo llegue a cero.  
 
 
+Link al Video 
+https://youtu.be/oq2JR05uwjY
 
 ---
 Diviértete jugando Candy Maze
