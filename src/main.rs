@@ -67,6 +67,66 @@ fn show_success_screen(
     }
 }
 
+fn show_lost_screen(
+    rl: &mut RaylibHandle,
+    th: &RaylibThread,
+    tex: &Texture2D,
+    screen_w: i32,
+    screen_h: i32,
+) {
+    loop {
+        {
+            let mut d = rl.begin_drawing(th);
+            d.clear_background(Color::BLACK);
+
+            let scale = (screen_w as f32 / tex.width as f32)
+                .max(screen_h as f32 / tex.height as f32);
+            let dest_w = tex.width as f32 * scale;
+            let dest_h = tex.height as f32 * scale;
+
+            let src = Rectangle::new(0.0, 0.0, tex.width as f32, tex.height as f32);
+            let dest = Rectangle::new(
+                (screen_w as f32 - dest_w) * 0.5,
+                (screen_h as f32 - dest_h) * 0.5,
+                dest_w,
+                dest_h,
+            );
+            d.draw_texture_pro(tex, src, dest, Vector2::zero(), 0.0, Color::WHITE);
+        }
+        if rl.is_key_pressed(KeyboardKey::KEY_SPACE) || rl.window_should_close() { break; }
+    }
+}
+
+fn show_start_screen(
+    rl: &mut RaylibHandle,
+    th: &RaylibThread,
+    tex: &Texture2D,
+    screen_w: i32,
+    screen_h: i32,
+) {
+    loop {
+        {
+            let mut d = rl.begin_drawing(th);
+            d.clear_background(Color::BLACK);
+
+            let scale = (screen_w as f32 / tex.width as f32)
+                .max(screen_h as f32 / tex.height as f32);
+            let dest_w = tex.width as f32 * scale;
+            let dest_h = tex.height as f32 * scale;
+
+            let src = Rectangle::new(0.0, 0.0, tex.width as f32, tex.height as f32);
+            let dest = Rectangle::new(
+                (screen_w as f32 - dest_w) * 0.5,
+                (screen_h as f32 - dest_h) * 0.5,
+                dest_w,
+                dest_h,
+            );
+            d.draw_texture_pro(tex, src, dest, Vector2::zero(), 0.0, Color::WHITE);
+        }
+        if rl.is_key_pressed(KeyboardKey::KEY_ENTER) || rl.window_should_close() { break; }
+    }
+}
+
 #[derive(Clone)]
 struct Candy { i: usize, j: usize, collected: bool }
 
@@ -253,6 +313,15 @@ fn main() {
         .load_texture(&raylib_thread, "assets/exito.png")
         .expect("No se pudo cargar assets/exito.png");
 
+    let inicio_tex: Texture2D = rl
+        .load_texture(&raylib_thread, "assets/inicio.png")
+        .expect("No se pudo cargar assets/inicio.png");
+    show_start_screen(&mut rl, &raylib_thread, &inicio_tex, SCREEN_W as i32, SCREEN_H as i32);
+
+    let lost_tex: Texture2D = rl
+        .load_texture(&raylib_thread, "assets/lost.png")
+        .expect("No se pudo cargar assets/lost.png");
+
     let mut framebuffer = Framebuffer::new(SCREEN_W, SCREEN_H);
 
     let mut current_level: usize = 0;
@@ -319,16 +388,24 @@ fn main() {
             if total_sprites > 0 && collected >= total_sprites && remaining >= 0 {
                 show_success_screen(&mut rl, &raylib_thread, &exito_tex, SCREEN_W as i32, SCREEN_H as i32);
 
-                current_level = (current_level + 1) % LEVELS.len();
+                if current_level + 1 >= LEVELS.len() {
+                    show_start_screen(&mut rl, &raylib_thread, &inicio_tex, SCREEN_W as i32, SCREEN_H as i32);
+                    current_level = 0;
+                    let (m2, s2, spawn2, dl2) = load_level(current_level, BLOCK_SIZE, &rl);
+                    maze = m2; sprites = s2; state.level_deadline = dl2;
+                    player.pos = spawn2; player.a = -PI/2.0;
+                } else {
+                    current_level = (current_level + 1) % LEVELS.len();
+                    let (m2, s2, spawn2, dl2) = load_level(current_level, BLOCK_SIZE, &rl);
+                    maze = m2; sprites = s2; state.level_deadline = dl2;
+                    player.pos = spawn2; player.a = -PI/2.0;
+                }
+            } else if remaining < 0 {
+                show_lost_screen(&mut rl, &raylib_thread, &lost_tex, SCREEN_W as i32, SCREEN_H as i32);
+
                 let (m2, s2, spawn2, dl2) = load_level(current_level, BLOCK_SIZE, &rl);
                 maze = m2; sprites = s2; state.level_deadline = dl2;
                 player.pos = spawn2; player.a = -PI/2.0;
-            } else if remaining < 0 {
-                state.msg_text = Some(String::from("¡Tiempo agotado! Reiniciando nivel…"));
-                state.msg_until = now + 2.0;
-                state.pause_started = now;
-                state.paused = true;
-                state.pending_action = Some(PendingAction::RestartLevel);
             }
         }
 
