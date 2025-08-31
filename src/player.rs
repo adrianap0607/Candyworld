@@ -53,6 +53,11 @@ pub fn process_events(player: &mut Player, rl: &RaylibHandle, maze: &Maze, block
     if rl.is_key_down(KeyboardKey::KEY_LEFT)  { player.a -= ROT_SPEED * dt; }
     if rl.is_key_down(KeyboardKey::KEY_RIGHT) { player.a += ROT_SPEED * dt; }
 
+    // mouse: rotación horizontal con delta X
+    let md = rl.get_mouse_delta();
+    const MOUSE_SENS: f32 = 0.003; // sensibilidad
+    player.a += md.x * MOUSE_SENS;
+
     let dir = Vector2::new(player.a.cos(), player.a.sin());
 
     let mut move_vec = Vector2::zero();

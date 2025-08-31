@@ -5,6 +5,7 @@ mod texture;
 mod maze;
 mod player;
 mod sprite;
+mod sound;
 
 use raylib::prelude::*;
 use std::f32::consts::PI;
@@ -15,6 +16,7 @@ use crate::texture::TextureManager;
 use crate::maze::{Maze, load_maze, find_char};
 use crate::player::{Player, process_events};
 use crate::sprite::{Sprite, draw_sprite};
+use crate::sound::SoundManager;
 
 #[derive(Clone, Copy)]
 struct LevelSpec { file: &'static str, time_limit: i32 }
@@ -322,6 +324,8 @@ fn main() {
         .load_texture(&raylib_thread, "assets/lost.png")
         .expect("No se pudo cargar assets/lost.png");
 
+    let mut sound_manager = SoundManager::new();
+
     let mut framebuffer = Framebuffer::new(SCREEN_W, SCREEN_H);
 
     let mut current_level: usize = 0;
@@ -346,6 +350,7 @@ fn main() {
 
     while !rl.window_should_close() {
         framebuffer.clear();
+        sound_manager.update();
 
         let now = rl.get_time();
         if state.paused {
@@ -378,7 +383,10 @@ fn main() {
             for s in &mut sprites {
                 let si = (s.x as usize) / BLOCK_SIZE;
                 let sj = (s.y as usize) / BLOCK_SIZE;
-                if !s.collected && si == ci && sj == cj { s.collected = true; }
+                if !s.collected && si == ci && sj == cj {
+                    s.collected = true;
+                    sound_manager.play_piece();
+                }
             }
 
             let total_sprites = sprites.len() as u32;
