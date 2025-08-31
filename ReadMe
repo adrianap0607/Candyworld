@@ -1,0 +1,24 @@
+# Candy Maze
+
+Candy Maze es un juego en primera persona hecho en **Rust** con la librería **raylib**.  
+El objetivo es explorar un laberinto y recolectar todas las donas antes de que se acabe el tiempo.  
+Si logras reunirlas todas, pasas al siguiente nivel; si no, pierdes y deberás volver a intentarlo.  
+
+## Controles
+- W / S: Avanzar y retroceder  
+- A / D: Moverse lateralmente  
+- Flechas izquierda/derecha: Rotar la vista  
+- Mouse: Girar la cámara horizontalmente  
+- ENTER: Confirmar en pantallas de inicio y victoria  
+- SPACEBAR: Reintentar en pantalla de derrota  
+
+## Cómo jugar
+1. Ejecuta el juego.  
+2. En la pantalla inicial, presiona ENTER.  
+3. Selecciona un nivel (1 o 2).  
+4. Recolecta todas las donas antes de que el tiempo llegue a cero.  
+
+
+
+---
+Diviértete jugando Candy Maze
